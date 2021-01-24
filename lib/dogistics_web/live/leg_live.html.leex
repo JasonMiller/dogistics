@@ -1,0 +1,25 @@
+<main>
+<section>
+  <div id="map" phx-hook="Map" phx-update="ignore" class="mapboxgl-map"></div>
+</section>
+<aside>
+  <h1>Legs</h1>
+
+  <ul>
+    <%= for leg <- @legs do %>
+      <li phx-hook="Leg">
+        <%= leg.start_point %> to <%= leg.end_point %>
+        <%= link "Delete", to: "#",
+              phx_click: "delete",
+              phx_value_id: leg.id %>
+      </li>
+    <% end %>
+  </ul>
+
+  <form action="#" phx-submit="add" phx-hook="Leg">
+    <%= text_input :leg, :start_point, placeholder: "Start Point", value: "Pittsburgh, PA" %>
+    <%= text_input :leg, :end_point, placeholder: "End Point", value: "Philadelphia, PA" %>
+    <%= submit "Add", phx_disable_with: "Adding..." %>
+  </form>
+</aside>
+</main>

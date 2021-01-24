@@ -27,6 +27,10 @@ html, body {
   overflow: scroll;
   padding: 16px;
   width: 30%;
+
+  ul {
+    list-style: none;
+  }
 }
 
 /* LiveView specific classes for your customizations */

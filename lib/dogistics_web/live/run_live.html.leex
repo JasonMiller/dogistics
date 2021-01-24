@@ -8,28 +8,35 @@
         <ul>
           <%= for leg <- @legs do %>
             <li phx-hook="Leg">
-              <%= leg.start_point %> to <%= leg.end_point %>
+              <strong><%= leg.start_point %> to <%= leg.end_point %></strong>
               <%= link "Delete", to: "#",
                     phx_click: "delete_leg",
                     phx_value_id: leg.id %>
 
-               <%= if Enum.any?(leg.dogs) do %>
-                <ul>
-                  <%= for dog <- leg.dogs do %>
-                    <li><%= dog.name %></li>
-                  <% end %>
-                </ul>
+              <%= if Enum.any?(leg.dogs) do %>
+                <br>
+                <%= Enum.count(leg.dogs) %>
+                Dog<%= if(Enum.count(leg.dogs) > 1, do: "s") %>
+                <%=
+                  leg.dogs
+                  |> Enum.map(& &1.name)
+                  |> Enum.join(", ")
+                %>
               <% end %>
             </li>
           <% end %>
         </ul>
 
         <form action="#" phx-submit="add_leg" phx-hook="Leg">
-          <%= text_input :leg, :start_point, placeholder: "Start Point", value: "Pittsburgh, PA" %>
-          <%= text_input :leg, :end_point, placeholder: "End Point", value: "Philadelphia, PA" %>
+          <%
+            last_leg = List.last(@legs) || %{end_point: nil, dogs: []}
+          %>
+          <%= text_input :leg, :start_point, placeholder: "Start Point", value: last_leg.end_point %>
+          <%= text_input :leg, :end_point, placeholder: "End Point" %>
 
           <%= for dog <- @dogs do %>
-            <input type="checkbox" name="leg[dogs][<%= dog.id %>]" id="leg_dogs_<%= dog.id %>" checked>
+            <% checked = Enum.member?(last_leg.dogs, dog) %>
+            <input type="checkbox" name="leg[dogs][<%= dog.id %>]" id="leg_dogs_<%= dog.id %>" <%= if(checked, do: "checked") %>>
             <label for="leg_dogs_<%= dog.id %>" class="label-inline"><%= dog.name %></label>
             <br>
           <% end %>
@@ -51,7 +58,7 @@
         </ul>
 
         <form action="#" phx-submit="add_dog">
-          <%= text_input :dog, :name, placeholder: "Name", value: "Pepper" %>
+          <%= text_input :dog, :name, placeholder: "Name" %>
           <%= submit "Add", phx_disable_with: "Adding..." %>
         </form>
       <% end %>

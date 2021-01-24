@@ -45,4 +45,31 @@ defmodule DogisticsWeb.API.RunController do
       }
     end)
   end
+
+  def fetch_bounds(conn, %{"id" => id}) do
+    legs = Dogistics.Runs.get_run!(id).legs
+
+    # could probably be done better with reduce
+    coords =
+      legs
+      |> Enum.map(fn %{start_point: start_point, end_point: end_point} -> [start_point, end_point] end)
+      |> List.flatten()
+      |> Enum.uniq()
+      |> Enum.map(& Mapbox.Geocoding.get_coordinates(&1))
+
+    {min_lng, max_lng} =
+      coords
+      |> Enum.map(fn [lng, _] -> lng end)
+      |> Enum.min_max()
+
+    {min_lat, max_lat} =
+      coords
+      |> Enum.map(fn [_, lat] -> lat end)
+      |> Enum.min_max()
+
+    json(conn, [
+      [min_lng, min_lat],
+      [max_lng, max_lat]
+    ])
+  end
 end

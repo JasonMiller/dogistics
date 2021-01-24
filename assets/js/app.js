@@ -27,7 +27,7 @@ let Map = {
     this.runId = runId;
 
     this.map = this.initializeMap(() => {
-      this.addSource(runId);
+      this.upsertSource();
       this.addLayers();
     });
 
@@ -45,11 +45,18 @@ let Map = {
     }).on('load', onLoad);
   },
 
-  addSource(runId) {
-    this.map.addSource(`route`, {
-      'type': 'geojson',
-      'data': `/api/runs/${runId}/fetch_features.geojson`
-    });
+  upsertSource() {
+    console.log('upsert')
+    const sourceId = 'route';
+    const data = `/api/runs/${this.runId}/fetch_features.geojson`;
+
+    if (this.map.getSource(sourceId)) {
+      this.map.getSource(sourceId).setData(`/api/runs/${this.runId}/fetch_features.geojson`);
+    } else {
+      this.map.addSource(sourceId, {'type': 'geojson', data});
+    }
+
+    this.fitBounds();
   },
 
   addLayers() {
@@ -75,28 +82,33 @@ let Map = {
       'source': `route`,
       'filter': ['==', '$type', 'Point'],
       'paint': {
-        'circle-radius': 6,
+        'circle-radius': 4,
         'circle-color': '#B42222'
       },
     });
   },
 
-  updateSource() {
-    this.map.getSource('route').setData(`/api/runs/${this.runId}/fetch_features.geojson`);
+  fitBounds() {
+    const url = `/api/runs/${this.runId}/fetch_bounds.json`;
+
+    fetch(url).then(response => response.json())
+              .then(data => {
+                this.map.fitBounds(data, {padding: 100})
+              });
   }
 };
 
 Hooks.Leg = {
   mounted() {
-    this.el.addEventListener("submit", this.updateSource.bind(this));
+    this.el.addEventListener("submit", this.upsertSource.bind(this));
   },
 
   destroyed() {
-    this.updateSource();
+    this.upsertSource();
   },
 
-  updateSource() {
-    window.Map.updateSource();
+  upsertSource() {
+    window.Map.upsertSource();
   }
 };
 

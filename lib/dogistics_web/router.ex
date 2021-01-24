@@ -29,6 +29,7 @@ defmodule DogisticsWeb.Router do
     pipe_through :api
 
     get("/runs/:id/fetch_features.geojson", API.RunController, :fetch_features)
+    get("/runs/:id/fetch_bounds.json", API.RunController, :fetch_bounds)
   end
 
   # Other scopes may use custom stacks.

@@ -22,47 +22,33 @@ let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("
 
 let Hooks = {};
 
-Hooks.Leg = {
-  mounted() {
-    this.el.addEventListener("submit", this.updateSource.bind(this));
-  },
-
-  destroyed() {
-    this.updateSource();
-  },
-
-  updateSource() {
-    window.map.getSource('route').setData('/api/legs/fetch_directions.geojson');
-  }
-};
-
-Hooks.Map = {
-  mounted() {
-    mapboxgl.accessToken = 'pk.eyJ1IjoibWlsbGxsbGx6IiwiYSI6ImNrazBkbjd6cjBnYTQydnBmbnNhOXB2NWIifQ.-nb92XoCw7zjc2ToVmssrQ';
+let Map = {
+  init(runId) {
+    this.runId = runId;
 
     this.map = this.initializeMap(() => {
-      this.addSource();
+      this.addSource(runId);
       this.addLayers();
     });
+
+    return this;
   },
 
   initializeMap(onLoad) {
-    this.map = new mapboxgl.Map({
+    mapboxgl.accessToken = 'pk.eyJ1IjoibWlsbGxsbGx6IiwiYSI6ImNrazBkbjd6cjBnYTQydnBmbnNhOXB2NWIifQ.-nb92XoCw7zjc2ToVmssrQ';
+
+    return new mapboxgl.Map({
       container: 'map',
       style: 'mapbox://styles/mapbox/streets-v11',
       center: [-73.98964547170478, 40.73259737898789],
       zoom: 5
     }).on('load', onLoad);
-
-    window.map = this.map;
-
-    return this.map;
   },
 
-  addSource() {
+  addSource(runId) {
     this.map.addSource(`route`, {
       'type': 'geojson',
-      'data': '/api/legs/fetch_directions.geojson'
+      'data': `/api/runs/${runId}/fetch_features.geojson`
     });
   },
 
@@ -93,6 +79,32 @@ Hooks.Map = {
         'circle-color': '#B42222'
       },
     });
+  },
+
+  updateSource() {
+    this.map.getSource('route').setData(`/api/runs/${this.runId}/fetch_features.geojson`);
+  }
+};
+
+Hooks.Leg = {
+  mounted() {
+    this.el.addEventListener("submit", this.updateSource.bind(this));
+  },
+
+  destroyed() {
+    this.updateSource();
+  },
+
+  updateSource() {
+    window.Map.updateSource();
+  }
+};
+
+Hooks.Run = {
+  mounted() {
+    const runId = this.el.dataset.id
+
+    window.Map = Map.init(runId);
   }
 };
 

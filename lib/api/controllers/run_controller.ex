@@ -1,8 +1,8 @@
-defmodule DogisticsWeb.API.LegsController do
+defmodule DogisticsWeb.API.RunController do
   use DogisticsWeb, :controller
 
-  def fetch_directions(conn, _params) do
-    legs = Dogistics.Legs.list_legs()
+  def fetch_features(conn, %{"id" => id}) do
+    legs = Dogistics.Runs.get_run!(id).legs
 
     features = direction_features(legs) ++ marker_features(legs)
 

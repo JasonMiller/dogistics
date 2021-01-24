@@ -3,6 +3,8 @@ defmodule Dogistics.Legs.Leg do
   import Ecto.Changeset
 
   schema "legs" do
+    belongs_to(:run, Dogistics.Runs.Run)
+
     field :end_point, :string
     field :start_point, :string
 

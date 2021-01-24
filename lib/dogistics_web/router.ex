@@ -18,14 +18,17 @@ defmodule DogisticsWeb.Router do
     pipe_through :browser
 
     live "/", LegLive, :index
+
+    scope "/runs" do
+      resources("/", RunController, only: [:index, :new, :create])
+      live "/edit/:id", RunLive, :edit
+    end
   end
 
   scope "/api", DogisticsWeb do
     pipe_through :api
 
-    scope "/legs" do
-      get("/fetch_directions.geojson", API.LegsController, :fetch_directions)
-    end
+    get("/runs/:id/fetch_features.geojson", API.RunController, :fetch_features)
   end
 
   # Other scopes may use custom stacks.

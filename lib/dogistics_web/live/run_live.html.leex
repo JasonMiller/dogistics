@@ -1,0 +1,25 @@
+<main class="map__main" phx-hook="Run" data-id="<%= @run.id %>">
+  <section class="map__section" phx-update="ignore">
+    <div id="map"></div>
+  </section>
+  <aside class="map__aside">
+    <h1>Legs</h1>
+
+    <ul>
+      <%= for leg <- @legs do %>
+        <li phx-hook="Leg">
+          <%= leg.start_point %> to <%= leg.end_point %>
+          <%= link "Delete", to: "#",
+                phx_click: "delete_leg",
+                phx_value_id: leg.id %>
+        </li>
+      <% end %>
+    </ul>
+
+    <form action="#" phx-submit="add_leg" phx-hook="Leg">
+      <%= text_input :leg, :start_point, placeholder: "Start Point", value: "Pittsburgh, PA" %>
+      <%= text_input :leg, :end_point, placeholder: "End Point", value: "Philadelphia, PA" %>
+      <%= submit "Add", phx_disable_with: "Adding..." %>
+    </form>
+  </aside>
+</main>

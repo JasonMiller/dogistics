@@ -7,12 +7,12 @@ html, body {
   padding: 0;
 }
 
-main {
+.map__main {
   display: flex;
   height: 100vh;
 }
 
-section {
+.map__section {
   flex-grow: 1;
 
   #map {
@@ -21,7 +21,7 @@ section {
   }
 }
 
-aside {
+.map__aside {
   overflow: scroll;
   padding: 16px;
   width: 30%;

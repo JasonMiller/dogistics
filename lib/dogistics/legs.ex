@@ -7,6 +7,7 @@ defmodule Dogistics.Legs do
   alias Dogistics.Repo
 
   alias Dogistics.Legs.Leg
+  alias Dogistics.Runs.Run
 
   @doc """
   Returns the list of legs.
@@ -49,8 +50,9 @@ defmodule Dogistics.Legs do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_leg(attrs \\ %{}) do
-    %Leg{}
+  def create_leg(%Run{} = run, attrs \\ %{}) do
+    run
+    |> Ecto.build_assoc(:legs)
     |> Leg.changeset(attrs)
     |> Repo.insert()
   end

@@ -1,0 +1,24 @@
+<h1>Listing Runs</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+<%= for run <- @runs do %>
+    <tr>
+      <td><%= run.name %></td>
+
+      <td>
+        <span><%= link "Edit", to: Routes.run_path(@conn, :edit, run) %></span>
+      </td>
+    </tr>
+<% end %>
+  </tbody>
+</table>
+
+<span><%= link "New Run", to: Routes.run_path(@conn, :new) %></span>

@@ -17,12 +17,12 @@ defmodule DogisticsWeb.Router do
   scope "/", DogisticsWeb do
     pipe_through :browser
 
-    live "/", LegLive, :index
+    # live "/", LegLive, :index
 
-    scope "/runs" do
+    # scope "/runs" do
       resources("/", RunController, except: [:show, :edit, :update])
       live "/:id/edit", RunLive, :edit
-    end
+    # end
   end
 
   scope "/api", DogisticsWeb do

@@ -12,6 +12,14 @@
               <%= link "Delete", to: "#",
                     phx_click: "delete_leg",
                     phx_value_id: leg.id %>
+
+               <%= if Enum.any?(leg.dogs) do %>
+                <ul>
+                  <%= for dog <- leg.dogs do %>
+                    <li><%= dog.name %></li>
+                  <% end %>
+                </ul>
+              <% end %>
             </li>
           <% end %>
         </ul>
@@ -19,6 +27,13 @@
         <form action="#" phx-submit="add_leg" phx-hook="Leg">
           <%= text_input :leg, :start_point, placeholder: "Start Point", value: "Pittsburgh, PA" %>
           <%= text_input :leg, :end_point, placeholder: "End Point", value: "Philadelphia, PA" %>
+
+          <%= for dog <- @dogs do %>
+            <input type="checkbox" name="leg[dogs][<%= dog.id %>]" id="leg_dogs_<%= dog.id %>" checked>
+            <label for="leg_dogs_<%= dog.id %>" class="label-inline"><%= dog.name %></label>
+            <br>
+          <% end %>
+
           <%= submit "Add", phx_disable_with: "Adding..." %>
         </form>
       <% end %>

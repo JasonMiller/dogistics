@@ -18,8 +18,6 @@ defmodule Mapbox.Geocoding do
       URI.encode_query(params)
     ], "?")
 
-    IO.puts(url)
-
     {:ok, %HTTPoison.Response{body: response_body}} = HTTPoison.get(url)
 
     Jason.decode!(response_body)

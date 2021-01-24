@@ -16,7 +16,7 @@ defmodule DogisticsWeb.TabsHelper do
         phx_update: "ignore"
       ),
       content_tag(:label, text, for: id, class: "tab__label"),
-      content_tag(:div, content, id: id, class: "tab__content")
+      content_tag(:div, content, class: "tab__content")
     ]
   end
 end

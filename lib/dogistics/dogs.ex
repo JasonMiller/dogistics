@@ -22,6 +22,12 @@ defmodule Dogistics.Dogs do
     Repo.all(Dog)
   end
 
+  def list_dogs_by_id(ids) do
+    query = from(dog in Dog, where: dog.id in ^ids)
+
+    Repo.all(query)
+  end
+
   @doc """
   Gets a single dog.
 

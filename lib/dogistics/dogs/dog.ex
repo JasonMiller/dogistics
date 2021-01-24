@@ -1,10 +1,9 @@
-defmodule Dogistics.Runs.Run do
+defmodule Dogistics.Dogs.Dog do
   use Ecto.Schema
   import Ecto.Changeset
 
-  schema "runs" do
-    has_many(:legs, Dogistics.Legs.Leg)
-    has_many(:dogs, Dogistics.Dogs.Dog)
+  schema "dogs" do
+    belongs_to(:run, Dogistics.Runs.Run)
 
     field :name, :string
 
@@ -12,8 +11,8 @@ defmodule Dogistics.Runs.Run do
   end
 
   @doc false
-  def changeset(run, attrs) do
-    run
+  def changeset(dog, attrs) do
+    dog
     |> cast(attrs, [:name])
     |> validate_required([:name])
   end

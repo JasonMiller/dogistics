@@ -3,23 +3,43 @@
     <div id="map"></div>
   </section>
   <aside class="map__aside">
-    <h1>Legs</h1>
+    <%= DogisticsWeb.TabsHelper.tabs do %>
+      <%= DogisticsWeb.TabsHelper.tab(:legs, "Legs", true) do %>
+        <ul>
+          <%= for leg <- @legs do %>
+            <li phx-hook="Leg">
+              <%= leg.start_point %> to <%= leg.end_point %>
+              <%= link "Delete", to: "#",
+                    phx_click: "delete_leg",
+                    phx_value_id: leg.id %>
+            </li>
+          <% end %>
+        </ul>
 
-    <ul>
-      <%= for leg <- @legs do %>
-        <li phx-hook="Leg">
-          <%= leg.start_point %> to <%= leg.end_point %>
-          <%= link "Delete", to: "#",
-                phx_click: "delete_leg",
-                phx_value_id: leg.id %>
-        </li>
+        <form action="#" phx-submit="add_leg" phx-hook="Leg">
+          <%= text_input :leg, :start_point, placeholder: "Start Point", value: "Pittsburgh, PA" %>
+          <%= text_input :leg, :end_point, placeholder: "End Point", value: "Philadelphia, PA" %>
+          <%= submit "Add", phx_disable_with: "Adding..." %>
+        </form>
       <% end %>
-    </ul>
 
-    <form action="#" phx-submit="add_leg" phx-hook="Leg">
-      <%= text_input :leg, :start_point, placeholder: "Start Point", value: "Pittsburgh, PA" %>
-      <%= text_input :leg, :end_point, placeholder: "End Point", value: "Philadelphia, PA" %>
-      <%= submit "Add", phx_disable_with: "Adding..." %>
-    </form>
+      <%= DogisticsWeb.TabsHelper.tab(:dogs, "Dogs") do %>
+        <ul>
+          <%= for dog <- @dogs do %>
+            <li>
+              <%= dog.name %>
+              <%= link "Delete", to: "#",
+                    phx_click: "delete_dog",
+                    phx_value_id: dog.id %>
+            </li>
+          <% end %>
+        </ul>
+
+        <form action="#" phx-submit="add_dog">
+          <%= text_input :dog, :name, placeholder: "Name", value: "Pepper" %>
+          <%= submit "Add", phx_disable_with: "Adding..." %>
+        </form>
+      <% end %>
+    <% end %>
   </aside>
 </main>

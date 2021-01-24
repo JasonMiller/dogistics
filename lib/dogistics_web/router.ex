@@ -20,8 +20,8 @@ defmodule DogisticsWeb.Router do
     live "/", LegLive, :index
 
     scope "/runs" do
-      resources("/", RunController, only: [:index, :new, :create])
-      live "/edit/:id", RunLive, :edit
+      resources("/", RunController, except: [:show, :edit, :update])
+      live "/:id/edit", RunLive, :edit
     end
   end
 

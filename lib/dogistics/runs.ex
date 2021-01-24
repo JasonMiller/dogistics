@@ -39,6 +39,7 @@ defmodule Dogistics.Runs do
     Run
     |> Repo.get!(id)
     |> Repo.preload(:legs)
+    |> Repo.preload(:dogs)
   end
 
   @doc """

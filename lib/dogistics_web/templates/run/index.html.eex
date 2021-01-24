@@ -15,6 +15,7 @@
 
       <td>
         <span><%= link "Edit", to: Routes.run_path(@conn, :edit, run) %></span>
+        <span><%= link "Delete", to: Routes.run_path(@conn, :delete, run), method: :delete, data: [confirm: "Are you sure?"] %></span>
       </td>
     </tr>
 <% end %>

@@ -38,7 +38,7 @@ defmodule Dogistics.Runs do
   def get_run!(id) do
     Run
     |> Repo.get!(id)
-    |> Repo.preload(legs: [:dogs])
+    |> Repo.preload(legs: [:dogs, :start_point, :end_point])
     |> Repo.preload(:dogs)
   end
 

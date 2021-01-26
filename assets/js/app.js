@@ -46,7 +46,6 @@ let Map = {
   },
 
   upsertSource() {
-    console.log('upsert')
     const sourceId = 'route';
     const data = `/api/runs/${this.runId}/fetch_features.geojson`;
 

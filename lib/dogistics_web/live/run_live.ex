@@ -3,14 +3,18 @@ defmodule DogisticsWeb.RunLive do
 
   alias Dogistics.Dogs
   alias Dogistics.Legs
+  alias Dogistics.Points
   alias Dogistics.Runs
 
   def mount(%{"id" => id}, _session, socket) do
     {:ok, fetch(socket, id)}
   end
 
-  def handle_event("add_leg", %{"leg" => leg}, %{assigns: %{run: run}} = socket) do
-    Legs.create_leg(run, leg)
+  def handle_event("add_leg", %{"leg" => leg, "start_point" => start_point, "end_point" => end_point}, %{assigns: %{run: run}} = socket) do
+    start_point = Points.get_or_create_point(start_point)
+    end_point = Points.get_or_create_point(end_point)
+
+    Legs.create_leg(run, start_point, end_point, leg)
 
     {:noreply, fetch(socket, run.id)}
   end

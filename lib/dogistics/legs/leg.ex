@@ -4,20 +4,19 @@ defmodule Dogistics.Legs.Leg do
 
   schema "legs" do
     belongs_to(:run, Dogistics.Runs.Run)
-    many_to_many(:dogs, Dogistics.Dogs.Dog, join_through: "dogs_legs")
+    belongs_to(:end_point, Dogistics.Points.Point, foreign_key: :end_point_id)
+    belongs_to(:start_point, Dogistics.Points.Point, foreign_key: :start_point_id)
 
-    field :end_point, :string
-    field :start_point, :string
+    many_to_many(:dogs, Dogistics.Dogs.Dog, join_through: "dogs_legs")
 
     timestamps()
   end
 
   @doc false
-  def changeset(leg, attrs) do
+  def changeset(leg, attrs \\ %{}) do
     leg
-    |> cast(attrs, [:start_point, :end_point])
+    |> cast(attrs, [])
     |> maybe_put_dogs(attrs)
-    |> validate_required([:start_point, :end_point])
   end
 
   def maybe_put_dogs(changeset, %{"dogs" => dogs}) do

@@ -15,7 +15,7 @@ defmodule DogisticsWeb.API.RunController do
   end
 
   defp direction_features(legs) do
-    Enum.map(legs, fn %{start_point: start_point, end_point: end_point} = leg ->
+    Enum.map(legs, fn %{start_point: %{location: start_point}, end_point: %{location: end_point}} = leg ->
       coordinates =
         [start_point, end_point]
         |> Enum.map(& Mapbox.Geocoding.get_coordinates(&1))
@@ -33,7 +33,7 @@ defmodule DogisticsWeb.API.RunController do
 
   defp marker_features(legs) do
     legs
-    |> Enum.flat_map(fn %{start_point: start_point, end_point: end_point} = leg -> [start_point, end_point] end)
+    |> Enum.flat_map(fn %{start_point: %{location: start_point}, end_point: %{location: end_point}} = leg -> [start_point, end_point] end)
     |> Enum.uniq()
     |> Enum.map(fn point ->
       %{
@@ -52,7 +52,7 @@ defmodule DogisticsWeb.API.RunController do
     # could probably be done better with reduce
     coords =
       legs
-      |> Enum.map(fn %{start_point: start_point, end_point: end_point} -> [start_point, end_point] end)
+      |> Enum.map(fn %{start_point: %{location: start_point}, end_point: %{location: end_point}} -> [start_point, end_point] end)
       |> List.flatten()
       |> Enum.uniq()
       |> Enum.map(& Mapbox.Geocoding.get_coordinates(&1))

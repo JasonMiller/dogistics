@@ -9,20 +9,24 @@ defmodule Dogistics.Legs.Leg do
 
     many_to_many(:dogs, Dogistics.Dogs.Dog, join_through: "dogs_legs")
 
+    field :coordinates, {:array, {:array, :float}}
+
     timestamps()
   end
 
   @doc false
-  def changeset(leg, attrs \\ %{}) do
+  def changeset(leg, attrs) do
     leg
-    |> cast(attrs, [])
+    |> cast(attrs, [:coordinates])
+    |> validate_required([:coordinates])
     |> maybe_put_dogs(attrs)
   end
 
   def maybe_put_dogs(changeset, %{"dogs" => dogs}) do
     dogs =
       dogs
-      |> Map.keys()
+      |> Enum.filter(fn {_id, checked} -> checked == "true" end)
+      |> Enum.map(fn {id, _checked} -> id end)
       |> Dogistics.Dogs.list_dogs_by_id()
 
     Ecto.Changeset.put_assoc(changeset, :dogs, dogs)

@@ -36,10 +36,21 @@ defmodule Dogistics.Runs do
 
   """
   def get_run!(id) do
-    Run
-    |> Repo.get!(id)
-    |> Repo.preload(legs: [:dogs, :start_point, :end_point])
-    |> Repo.preload(:dogs)
+    query = from(run in Run,
+      left_join: dogs in assoc(run, :dogs),
+      left_join: legs in assoc(run, :legs),
+      left_join: legs_dogs in assoc(legs, :dogs),
+      left_join: start_point in assoc(legs, :start_point),
+      left_join: end_point in assoc(legs, :end_point),
+      where: run.id == ^id,
+      preload: [
+        dogs: dogs,
+        legs: {legs, [dogs: legs_dogs, start_point: start_point, end_point: end_point]}
+      ],
+      order_by: [asc: legs.id, asc: dogs.name]
+    )
+
+    Repo.one(query)
   end
 
   @doc """

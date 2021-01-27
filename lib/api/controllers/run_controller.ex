@@ -15,12 +15,7 @@ defmodule DogisticsWeb.API.RunController do
   end
 
   defp direction_features(legs) do
-    Enum.map(legs, fn %{start_point: %{location: start_point}, end_point: %{location: end_point}} = leg ->
-      coordinates =
-        [start_point, end_point]
-        |> Enum.map(& Mapbox.Geocoding.get_coordinates(&1))
-        |> Mapbox.Directions.get_coordinates()
-
+    Enum.map(legs, fn %{coordinates: coordinates} ->
       %{
         type: "Feature",
         geometry: %{
@@ -33,14 +28,14 @@ defmodule DogisticsWeb.API.RunController do
 
   defp marker_features(legs) do
     legs
-    |> Enum.flat_map(fn %{start_point: %{location: start_point}, end_point: %{location: end_point}} = leg -> [start_point, end_point] end)
+    |> Enum.flat_map(fn %{start_point: %{coordinates: start_point}, end_point: %{coordinates: end_point}} = leg -> [start_point, end_point] end)
     |> Enum.uniq()
-    |> Enum.map(fn point ->
+    |> Enum.map(fn coordinates ->
       %{
         type: "Feature",
         geometry: %{
           type: "Point",
-          coordinates: Mapbox.Geocoding.get_coordinates(point)
+          coordinates: coordinates
         }
       }
     end)
@@ -52,24 +47,29 @@ defmodule DogisticsWeb.API.RunController do
     # could probably be done better with reduce
     coords =
       legs
-      |> Enum.map(fn %{start_point: %{location: start_point}, end_point: %{location: end_point}} -> [start_point, end_point] end)
-      |> List.flatten()
+      |> Enum.flat_map(fn %{start_point: %{coordinates: start_point}, end_point: %{coordinates: end_point}} = leg -> [start_point, end_point] end)
       |> Enum.uniq()
-      |> Enum.map(& Mapbox.Geocoding.get_coordinates(&1))
 
-    {min_lng, max_lng} =
-      coords
-      |> Enum.map(fn [lng, _] -> lng end)
-      |> Enum.min_max()
+    json =
+      if Enum.empty?(coords) do
+        nil
+      else
+        {min_lng, max_lng} =
+          coords
+          |> Enum.map(fn [lng, _] -> lng end)
+          |> Enum.min_max()
 
-    {min_lat, max_lat} =
-      coords
-      |> Enum.map(fn [_, lat] -> lat end)
-      |> Enum.min_max()
+        {min_lat, max_lat} =
+          coords
+          |> Enum.map(fn [_, lat] -> lat end)
+          |> Enum.min_max()
 
-    json(conn, [
-      [min_lng, min_lat],
-      [max_lng, max_lat]
-    ])
+        [
+          [min_lng, min_lat],
+          [max_lng, max_lat]
+        ]
+      end
+
+      json(conn, json)
   end
 end

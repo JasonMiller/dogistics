@@ -40,6 +40,7 @@ let Map = {
     return new mapboxgl.Map({
       container: 'map',
       style: 'mapbox://styles/mapbox/streets-v11',
+      // style: 'mapbox://styles/mapbox/dark-v9',
       center: [-73.98964547170478, 40.73259737898789],
       zoom: 5
     }).on('load', onLoad);
@@ -48,6 +49,8 @@ let Map = {
   upsertSource() {
     const sourceId = 'route';
     const data = `/api/runs/${this.runId}/fetch_features.geojson`;
+
+    if (!this.map.loaded()) return false;
 
     if (this.map.getSource(sourceId)) {
       this.map.getSource(sourceId).setData(`/api/runs/${this.runId}/fetch_features.geojson`);
@@ -71,7 +74,7 @@ let Map = {
       'paint': {
         'line-color': 'green',
         'line-opacity': 0.75,
-        'line-width': 8
+        'line-width': 6
       }
     });
 
@@ -81,7 +84,7 @@ let Map = {
       'source': `route`,
       'filter': ['==', '$type', 'Point'],
       'paint': {
-        'circle-radius': 4,
+        'circle-radius': 6,
         'circle-color': '#B42222'
       },
     });
@@ -92,14 +95,16 @@ let Map = {
 
     fetch(url).then(response => response.json())
               .then(data => {
-                this.map.fitBounds(data, {padding: 100})
+                if (data) {
+                  this.map.fitBounds(data, {padding: 100});
+                }
               });
   }
 };
 
 Hooks.Leg = {
   mounted() {
-    this.el.addEventListener("submit", this.upsertSource.bind(this));
+    this.upsertSource();
   },
 
   destroyed() {

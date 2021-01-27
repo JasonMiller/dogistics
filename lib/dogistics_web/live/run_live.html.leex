@@ -7,7 +7,7 @@
       <%= DogisticsWeb.TabsHelper.tab(:legs, "Legs", true) do %>
         <ul>
           <%= for leg <- @legs do %>
-            <li phx-hook="Leg">
+            <li phx-hook="Leg" id="leg_<%= leg.id %>">
               <strong><%= leg.start_point.location %> to <%= leg.end_point.location %></strong>
               <%= link "Delete", to: "#",
                     phx_click: "delete_leg",
@@ -15,29 +15,33 @@
 
               <%= if Enum.any?(leg.dogs) do %>
                 <br>
-                <%= Enum.count(leg.dogs) %>
-                Dog<%= if(Enum.count(leg.dogs) > 1, do: "s") %>
-                <%=
-                  leg.dogs
-                  |> Enum.map(& &1.name)
-                  |> Enum.join(", ")
-                %>
+                <details>
+                  <summary>
+                    <%= Enum.count(leg.dogs) %> Dog<%= if(Enum.count(leg.dogs) > 1, do: "s") %>
+                  </summary>
+
+                  <%=
+                    leg.dogs
+                    |> Enum.map(& &1.name)
+                    |> Enum.join(", ")
+                  %>
+                </details>
               <% end %>
             </li>
           <% end %>
         </ul>
 
-        <form action="#" phx-submit="add_leg" phx-hook="Leg">
+        <form id="leg" action="#" phx-submit="add_leg">
           <%
-            last_leg = List.last(@legs) || %{end_point: nil, dogs: []}
+            last_leg = List.last(@legs) || %{end_point: %{location: nil}, dogs: []}
           %>
-          <%#= text_input :start_point, :location, placeholder: "Start Point", value: last_leg.end_point %>
-          <%= text_input :start_point, :location, placeholder: "Start Point", value: "Pittsburgh, PA" %>
-          <%= text_input :end_point, :location, placeholder: "End Point", value: "Philadelphia, PA" %>
+          <%= text_input :start_point, :location, placeholder: "Start Point", value: last_leg.end_point.location %>
+          <%= text_input :end_point, :location, placeholder: "End Point" %>
 
           <%= for dog <- @dogs do %>
             <% checked = Enum.member?(last_leg.dogs, dog) %>
-            <input type="checkbox" name="leg[dogs][<%= dog.id %>]" id="leg_dogs_<%= dog.id %>" <%= if(checked, do: "checked") %>>
+            <input name="leg[dogs][<%= dog.id %>]" type="hidden" value="false">
+            <input id="leg_dogs_<%= dog.id %>" name="leg[dogs][<%= dog.id %>]" type="checkbox" value="true" <%= if(checked, do: "checked") %>>
             <label for="leg_dogs_<%= dog.id %>" class="label-inline"><%= dog.name %></label>
             <br>
           <% end %>

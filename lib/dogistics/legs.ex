@@ -52,6 +52,8 @@ defmodule Dogistics.Legs do
 
   """
   def create_leg(%Run{} = run, %Point{} = start_point, %Point{} = end_point, attrs \\ %{}) do
+    attrs = maybe_put_coordinates(attrs, start_point, end_point)
+
     run
     |> Ecto.build_assoc(:legs)
     |> Leg.changeset(attrs)
@@ -59,6 +61,12 @@ defmodule Dogistics.Legs do
     |> Ecto.Changeset.put_assoc(:end_point, end_point)
     |> Repo.insert()
   end
+
+  def maybe_put_coordinates(attrs, %{coordinates: start_point}, %{coordinates: end_point}) do
+    Map.put(attrs, "coordinates", Mapbox.Directions.get_coordinates([start_point, end_point]))
+  end
+
+  def maybe_put_coordinates(attrs, _, _), do: attrs
 
   @doc """
   Updates a leg.

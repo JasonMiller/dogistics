@@ -4,11 +4,11 @@ defmodule DogisticsWeb.API.RunController do
   def fetch_features(conn, %{"id" => id}) do
     legs = Dogistics.Runs.get_run!(id).legs
 
-    features = direction_features(legs) ++ marker_features(legs)
+    # features = direction_features(legs) ++ marker_features(legs)
 
     json = %{
       type: "FeatureCollection",
-      features: features
+      features: direction_features(legs)
     }
 
     json(conn, json)
@@ -24,6 +24,48 @@ defmodule DogisticsWeb.API.RunController do
         }
       }
     end)
+  end
+
+  def fetch_markers(conn, %{"id" => id}) do
+    legs = Dogistics.Runs.get_run!(id).legs
+
+    features =
+      legs
+      |> Enum.flat_map(fn %{start_point: start_point, end_point: end_point} = leg -> [start_point, end_point] end)
+      |> Enum.uniq()
+      |> Enum.map(fn %{id: id, coordinates: coordinates, location: location} = _point ->
+        inbound = Enum.filter(legs, fn %{end_point: %{id: end_point_id}} = _leg -> end_point_id == id end)
+        inbound_dogs =
+          inbound
+          |> Enum.map(fn %{dogs: dogs} -> Enum.count(dogs) end)
+          |> Enum.sum()
+
+        outbound = Enum.filter(legs, fn %{start_point: %{id: start_point_id}} = _leg -> start_point_id == id end)
+        outbound_dogs =
+          outbound
+          |> Enum.map(fn %{dogs: dogs} -> Enum.count(dogs) end)
+          |> Enum.sum()
+
+        %{
+          type: "Feature",
+          geometry: %{
+            type: "Point",
+            coordinates: coordinates
+          },
+          properties: %{
+            location: location,
+            inbound_dogs: inbound_dogs,
+            outbound_dogs: outbound_dogs,
+          }
+        }
+      end)
+
+      json = %{
+        type: "FeatureCollection",
+        features: features
+      }
+
+      json(conn, json)
   end
 
   defp marker_features(legs) do

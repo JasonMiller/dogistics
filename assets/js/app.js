@@ -59,6 +59,7 @@ let Map = {
     }
 
     this.fitBounds();
+    this.addMarkers();
   },
 
   addLayers() {
@@ -72,8 +73,8 @@ let Map = {
       },
       'filter': ['==', '$type', 'LineString'],
       'paint': {
-        'line-color': 'green',
-        'line-opacity': 0.75,
+        'line-color': 'rgb(0, 122, 255)',
+        'line-opacity': 0.5,
         'line-width': 6
       }
     });
@@ -98,6 +99,32 @@ let Map = {
                 if (data) {
                   this.map.fitBounds(data, {padding: 100});
                 }
+              });
+  },
+
+  addMarkers() {
+    const url = `/api/runs/${this.runId}/fetch_markers.geojson`;
+
+    fetch(url).then(response => response.json())
+              .then(geojson => {
+                console.log(geojson);
+                geojson.features.forEach((marker) => {
+
+                  // create a HTML element for each feature
+                  let el = document.createElement('div');
+                  const diff = marker.properties.outbound_dogs - marker.properties.inbound_dogs;
+                  el.innerHTML = diff == 0 ? '' : Math.abs(diff);
+                  el.className = 'marker';
+
+                  if (diff > 0) el.className += " marker--pick-up";
+                  if (diff < 0) el.className += " marker--drop-off";
+                  if (diff == 0) el.className += " marker--neutral";
+
+                  // make a marker for each feature and add to the map
+                  new mapboxgl.Marker(el)
+                    .setLngLat(marker.geometry.coordinates)
+                    .addTo(this.map);
+                });
               });
   }
 };

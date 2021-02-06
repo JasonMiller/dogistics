@@ -20,7 +20,10 @@ defmodule Dogistics.Legs do
 
   """
   def list_legs do
-    Repo.all(Leg)
+    Leg
+    |> Repo.all()
+    |> Repo.preload(:start_point)
+    |> Repo.preload(:end_point)
   end
 
   @doc """
@@ -39,6 +42,21 @@ defmodule Dogistics.Legs do
   """
   def get_leg!(id), do: Repo.get!(Leg, id)
 
+  def get_or_create_leg(%Run{} = run, %Point{} = start_point, %Point{} = end_point, attrs \\ %{}) do
+    case get_leg(run, start_point, end_point) do
+      nil -> create_leg(run, start_point, end_point)
+      leg -> leg
+    end
+  end
+
+  def get_leg(%Run{} = run, %Point{} = start_point, %Point{} = end_point) do
+    Repo.get_by(Leg,
+      run_id: run.id,
+      start_point_id: start_point.id,
+      end_point_id: end_point.id
+    )
+  end
+
   @doc """
   Creates a leg.
 
@@ -52,7 +70,7 @@ defmodule Dogistics.Legs do
 
   """
   def create_leg(%Run{} = run, %Point{} = start_point, %Point{} = end_point, attrs \\ %{}) do
-    attrs = maybe_put_coordinates(attrs, start_point, end_point)
+    attrs = maybe_merge_mapping_attrs(attrs, start_point, end_point)
 
     run
     |> Ecto.build_assoc(:legs)
@@ -62,11 +80,16 @@ defmodule Dogistics.Legs do
     |> Repo.insert()
   end
 
-  def maybe_put_coordinates(attrs, %{coordinates: start_point}, %{coordinates: end_point}) do
-    Map.put(attrs, "coordinates", Mapbox.Directions.get_coordinates([start_point, end_point]))
+  def maybe_merge_mapping_attrs(attrs, %{coordinates: start_point}, %{coordinates: end_point}) do
+    attrs =
+      [start_point, end_point]
+      |> Mapbox.Directions.get()
+      |> Mapbox.Directions.get_attrs()
+
+    Map.merge(attrs, attrs)
   end
 
-  def maybe_put_coordinates(attrs, _, _), do: attrs
+  def maybe_merge_mapping_attrs(attrs, _, _), do: attrs
 
   @doc """
   Updates a leg.
@@ -85,6 +108,11 @@ defmodule Dogistics.Legs do
     |> Leg.changeset(attrs)
     |> Repo.update()
   end
+
+  # def update_leg(%Leg{} = %{start_point: start_point, end_point: end_point} = leg) do
+  #   update_leg(leg, maybe_merge_mapping_attrs(%{}, start_point, end_point))
+  # end
+
 
   @doc """
   Deletes a leg.

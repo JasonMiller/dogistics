@@ -7,6 +7,5 @@ defmodule Dogistics.Repo.Migrations.CreateRuns do
 
       timestamps()
     end
-
   end
 end

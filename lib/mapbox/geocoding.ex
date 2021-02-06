@@ -8,15 +8,20 @@ defmodule Mapbox.Geocoding do
 
   def get(place \\ "Macon, Georgia") do
     params = %{
-      access_token: "pk.eyJ1IjoibWlsbGxsbGx6IiwiYSI6ImNrazBkbjd6cjBnYTQydnBmbnNhOXB2NWIifQ.-nb92XoCw7zjc2ToVmssrQ",
-      cachebuster: 1611101950528,
+      access_token:
+        "pk.eyJ1IjoibWlsbGxsbGx6IiwiYSI6ImNrazBkbjd6cjBnYTQydnBmbnNhOXB2NWIifQ.-nb92XoCw7zjc2ToVmssrQ",
+      cachebuster: 1_611_101_950_528,
       autocomplete: true
     }
 
-    url = Enum.join([
-      URI.encode("https://api.mapbox.com/geocoding/v5/mapbox.places/#{place}.json"),
-      URI.encode_query(params)
-    ], "?")
+    url =
+      Enum.join(
+        [
+          URI.encode("https://api.mapbox.com/geocoding/v5/mapbox.places/#{place}.json"),
+          URI.encode_query(params)
+        ],
+        "?"
+      )
 
     {:ok, %HTTPoison.Response{body: response_body}} = HTTPoison.get(url)
 

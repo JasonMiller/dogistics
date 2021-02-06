@@ -75,6 +75,7 @@ defmodule DogisticsWeb.RunControllerTest do
     test "deletes chosen run", %{conn: conn, run: run} do
       conn = delete(conn, Routes.run_path(conn, :delete, run))
       assert redirected_to(conn) == Routes.run_path(conn, :index)
+
       assert_error_sent 404, fn ->
         get(conn, Routes.run_path(conn, :show, run))
       end

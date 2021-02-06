@@ -31,6 +31,8 @@ let Map = {
       this.addLayers();
     });
 
+    this.markers = [];
+
     return this;
   },
 
@@ -39,8 +41,8 @@ let Map = {
 
     return new mapboxgl.Map({
       container: 'map',
-      style: 'mapbox://styles/mapbox/streets-v11',
-      // style: 'mapbox://styles/mapbox/dark-v9',
+      // style: 'mapbox://styles/mapbox/streets-v11',
+      style: 'mapbox://styles/mapbox/dark-v9',
       center: [-73.98964547170478, 40.73259737898789],
       zoom: 5
     }).on('load', onLoad);
@@ -107,7 +109,8 @@ let Map = {
 
     fetch(url).then(response => response.json())
               .then(geojson => {
-                console.log(geojson);
+                this.clearMarkers();
+
                 geojson.features.forEach((marker) => {
 
                   // create a HTML element for each feature
@@ -121,11 +124,19 @@ let Map = {
                   if (diff == 0) el.className += " marker--neutral";
 
                   // make a marker for each feature and add to the map
-                  new mapboxgl.Marker(el)
+                  const markerElement = new mapboxgl.Marker(el)
                     .setLngLat(marker.geometry.coordinates)
                     .addTo(this.map);
+
+                  this.markers.push(markerElement);
                 });
               });
+  },
+
+  clearMarkers() {
+    this.markers.forEach(marker => {
+      marker.remove();
+    });
   }
 };
 
@@ -140,6 +151,92 @@ Hooks.Leg = {
 
   upsertSource() {
     window.Map.upsertSource();
+  }
+};
+
+Hooks.Point = {
+  mounted() {
+    this.el.addEventListener('dragstart', this.dragstart.bind(this));
+    this.el.addEventListener('dragover', this.dragover.bind(this));
+    this.el.addEventListener('dragenter', this.dragenter.bind(this));
+    this.el.addEventListener('dragleave', this.dragleave.bind(this));
+    this.el.addEventListener('drop', this.drop.bind(this));
+  },
+
+  dragstart(event) {
+    event.dataTransfer.setData('id', event.target.id);
+    console.log('dragstart', event.target.id);
+    event.dataTransfer.effectAllowed = 'copy';
+  },
+
+  dragover(event) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy'
+  },
+
+  dragenter(event) {
+    event.preventDefault();
+    event.target.classList.add('enter');
+  },
+
+  dragleave(event) {
+    event.preventDefault();
+    event.target.classList.remove('enter');
+  },
+
+  drop(event) {
+    event.preventDefault();
+    const target = event.target;
+    const id = event.dataTransfer.getData('id');
+    const element = document.getElementById(id);
+    const parent = target.parentElement;
+    const sibling = target.nextElementSibling;
+
+    event.target.classList.remove('enter');
+
+    this.pushEvent(element, target);
+    parent.insertBefore(element, sibling);
+  },
+
+  pushEvent(element, insertAfter) {
+    console.log('id', element.dataset.id, 'insertAfter.id', insertAfter.dataset.id);
+    this.pushEventTo(`#${this.el.id}`, 'insert_after', {
+      id: element.dataset.id,
+      insert_after_id: insertAfter.dataset.id
+    });
+  },
+
+  upsertSource() {
+    window.Map.upsertSource();
+  }
+};
+
+Hooks.PointDrop = {
+  mounted() {
+    // this.el.addEventListener('drop', (e) => {
+    //   e.preventDefault();
+    //   console.log('drop')
+    //   const id = e.dataTransfer.getData('id');
+    //   const target = e.target;
+    //   const parent = target.parentElement;
+    //   const grandParent = parent.parentElement;
+    //   const element = document.getElementById(id);
+
+    //   grandParent.insertBefore(element, parent);
+    //   console.log(e);
+    // });
+
+    // this.el.addEventListener('dragover', (e) => {
+    //   e.preventDefault();
+    //   e.target.classList.add('enter');
+    //   console.log('dragenter', e);
+    // });
+
+    // this.el.addEventListener('dragleave', (e) => {
+    //   e.preventDefault();
+    //   e.target.classList.remove('enter');
+    //   // console.log('dragleave');
+    // });
   }
 };
 

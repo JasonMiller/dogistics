@@ -4,7 +4,30 @@
   </section>
   <aside class="map__aside">
     <%= DogisticsWeb.TabsHelper.tabs do %>
-      <%= DogisticsWeb.TabsHelper.tab(:legs, "Legs", true) do %>
+      <%= DogisticsWeb.TabsHelper.tab(:points, "Points", true) do %>
+        <ul>
+          <%= for point <- @points do %>
+            <li phx-hook="Point" id="point_<%= point.id %>" draggable="true" data-id="<%= point.id %>">
+              <div phx-hook="PointDrop" class="before">Before <%= point.location %></div>
+              <%= point.id %>
+              <%= point.location %>
+
+              <%= link "Delete", to: "#",
+                    phx_click: "delete_point",
+                    phx_value_id: point.id %>
+
+              <div phx-hook="PointDrop" class="after">After <%= point.location %></div>
+            </li>
+          <% end %>
+        </ul>
+
+        <form action="#" phx-submit="add_point">
+          <%= text_input :point, :location, placeholder: "Location" %>
+          <%= submit "Add", phx_disable_with: "Adding..." %>
+        </form>
+      <% end %>
+
+      <%= DogisticsWeb.TabsHelper.tab(:legs, "Legs") do %>
         <ul>
           <%= for leg <- @legs do %>
             <li phx-hook="Leg" id="leg_<%= leg.id %>">

@@ -1,12 +1,19 @@
 defmodule Mapbox.Directions do
-  def get_coordinates(list \\ [
-    [-73.98964547170478,40.73259737898789],
-    [-73.9885340717875,40.73212906341979]
-  ]) do
-    case get(list) do
-      %{"routes" => [%{"geometry" => %{"coordinates" => coordinates}} | _]} = r -> coordinates
-      r -> raise r
-    end
+  def get_attrs(
+        %{
+          "routes" => [
+            %{
+              "geometry" => %{"coordinates" => coordinates},
+              "legs" => [%{"distance" => distance} | _]
+            }
+            | _
+          ]
+        } = response_json
+      ) do
+    %{
+      "coordinates" => coordinates,
+      "distance" => distance
+    }
   end
 
   def get(list) do
@@ -14,7 +21,8 @@ defmodule Mapbox.Directions do
       alternatives: true,
       geometries: "geojson",
       steps: true,
-      access_token: "pk.eyJ1IjoibWlsbGxsbGx6IiwiYSI6ImNrazBkbjd6cjBnYTQydnBmbnNhOXB2NWIifQ.-nb92XoCw7zjc2ToVmssrQ"
+      access_token:
+        "pk.eyJ1IjoibWlsbGxsbGx6IiwiYSI6ImNrazBkbjd6cjBnYTQydnBmbnNhOXB2NWIifQ.-nb92XoCw7zjc2ToVmssrQ"
     }
 
     coords =
@@ -22,10 +30,14 @@ defmodule Mapbox.Directions do
       |> Enum.map(fn [lng, lat] -> "#{lng},#{lat}" end)
       |> Enum.join(";")
 
-    url = Enum.join([
-      URI.encode("https://api.mapbox.com/directions/v5/mapbox/driving/#{coords}"),
-      URI.encode_query(params)
-    ], "?")
+    url =
+      Enum.join(
+        [
+          URI.encode("https://api.mapbox.com/directions/v5/mapbox/driving/#{coords}"),
+          URI.encode_query(params)
+        ],
+        "?"
+      )
 
     {:ok, %HTTPoison.Response{body: response_body}} = HTTPoison.get(url)
 

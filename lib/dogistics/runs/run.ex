@@ -3,8 +3,9 @@ defmodule Dogistics.Runs.Run do
   import Ecto.Changeset
 
   schema "runs" do
-    has_many(:legs, Dogistics.Legs.Leg)
+    has_many(:legs, Dogistics.Legs.Leg, on_replace: :delete)
     has_many(:dogs, Dogistics.Dogs.Dog)
+    has_many(:points, Dogistics.Points.Point)
 
     field :name, :string
 

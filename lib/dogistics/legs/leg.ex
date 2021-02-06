@@ -10,6 +10,7 @@ defmodule Dogistics.Legs.Leg do
     many_to_many(:dogs, Dogistics.Dogs.Dog, join_through: "dogs_legs")
 
     field :coordinates, {:array, {:array, :float}}
+    field :distance, :float
 
     timestamps()
   end
@@ -17,8 +18,10 @@ defmodule Dogistics.Legs.Leg do
   @doc false
   def changeset(leg, attrs) do
     leg
-    |> cast(attrs, [:coordinates])
-    |> validate_required([:coordinates])
+    |> cast(attrs, [:coordinates, :distance])
+    |> foreign_key_constraint(:start_point_id)
+    |> foreign_key_constraint(:end_point_id)
+    |> validate_required([:coordinates, :distance])
     |> maybe_put_dogs(attrs)
   end
 

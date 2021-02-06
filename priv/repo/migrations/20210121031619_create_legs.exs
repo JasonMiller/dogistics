@@ -8,6 +8,5 @@ defmodule Dogistics.Repo.Migrations.CreateLegs do
 
       timestamps()
     end
-
   end
 end

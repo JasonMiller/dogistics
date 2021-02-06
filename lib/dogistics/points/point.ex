@@ -5,6 +5,16 @@ defmodule Dogistics.Points.Point do
   schema "points" do
     field :location, :string
     field :coordinates, {:array, :float}
+    field :order, :integer
+
+    belongs_to(:run, Dogistics.Runs.Run)
+
+    has_many(:inbound_legs, Dogistics.Legs.Leg, foreign_key: :end_point_id, on_delete: :delete_all)
+
+    has_many(:outbound_legs, Dogistics.Legs.Leg,
+      foreign_key: :start_point_id,
+      on_delete: :delete_all
+    )
 
     timestamps()
   end
@@ -14,7 +24,7 @@ defmodule Dogistics.Points.Point do
     attrs = maybe_put_coordinates(attrs)
 
     point
-    |> cast(attrs, [:location, :coordinates])
+    |> cast(attrs, [:location, :coordinates, :order])
     |> validate_required([:location, :coordinates])
   end
 
